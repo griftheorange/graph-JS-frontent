@@ -2,13 +2,13 @@
 
 document.addEventListener("DOMContentLoaded", (evt) => {
     let bod = document.querySelector("body")
-    constructMain()
+    // constructMain()
     // loggedInTest()
-    // datasetTest(22)
+    datasetTest(28)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")
-        newH1.dataset.user_id = 17
+        newH1.dataset.user_id = 19
         bod.append(newH1)
         renderDsPage(ds_id)
     }
@@ -42,16 +42,6 @@ document.addEventListener("DOMContentLoaded", (evt) => {
         bod.append(password)
         bod.append(log)
         bod.append(cre)
-    }
-
-    function fetchGriff(){
-        return fetch("http://localhost:3000/users")
-        .then(r => r.json())
-        .then((users) => {
-            return users.find((user) => {
-                return user.username == "griff"
-            })
-        })
     }
 
     function loginClick(evt){
