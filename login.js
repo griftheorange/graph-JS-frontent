@@ -2,9 +2,17 @@
 
 document.addEventListener("DOMContentLoaded", (evt) => {
     let bod = document.querySelector("body")
-    // constructMain()
-    loggedInTest()
-    
+    constructMain()
+    // loggedInTest()
+    // datasetTest(22)
+
+    function datasetTest(ds_id){
+        let newH1 = document.createElement("h1")
+        newH1.dataset.user_id = 17
+        bod.append(newH1)
+        renderDsPage(ds_id)
+    }
+
     function loggedInTest(){
         fetchGriff()
         .then((griff) => {
@@ -40,7 +48,7 @@ document.addEventListener("DOMContentLoaded", (evt) => {
         return fetch("http://localhost:3000/users")
         .then(r => r.json())
         .then((users) => {
-            return users["users"].find((user) => {
+            return users.find((user) => {
                 return user.username == "griff"
             })
         })
@@ -82,7 +90,7 @@ document.addEventListener("DOMContentLoaded", (evt) => {
         fetch("http://localhost:3000/users")
         .then(r => r.json())
         .then((users) => {
-            let found = users["users"].find((user) => {
+            let found = users.find((user) => {
                 return user.username == userInput
             })
             if(found && tf_1.id == "username_login"){
