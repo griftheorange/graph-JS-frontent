@@ -101,8 +101,4 @@ document.addEventListener("DOMContentLoaded", (evt) => {
         console.log(str)
     }
 
-    function insertAfter(el, referenceNode) {
-        referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
-    }
-
 })

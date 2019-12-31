@@ -18,3 +18,11 @@ function fetchDataset(dataset){
     .then(r => r.blob())
     .then(r => r.text())
 }
+
+function insertAfter(el, referenceNode) {
+    referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
+}
+
+function insertBefore(el, referenceNode) {
+    referenceNode.parentNode.insertBefore(el, referenceNode);
+}
