@@ -1,10 +1,11 @@
 function renderMainMenu(user, bod){
+
     let child = bod.lastElementChild
     while (child) {
         child.remove()
         child = bod.lastElementChild
     }
-
+    renderTopBar(user, bod)
     let userHead = document.createElement("h1")
     let fileInput = document.createElement("input")
     let submit = document.createElement("input")
@@ -55,6 +56,11 @@ function renderDatasets(){
 }
 
 function renderDs(evt){
+    getUser()
+    .then((user) => {
+        console.log(user)
+        renderDsPage(evt.target.dataset.ds_id)
+    })
     renderDsPage(evt.target.dataset.ds_id)
 }
 
@@ -95,7 +101,7 @@ function csvUploadedEvent(evt) {
     reader.onload = (function(theFile) {
         return function(e) {
             let newCSV = csvJSON(e.target.result)
-            generateTable(newCSV)
+            document.querySelector("body").append(generateTable(newCSV))
         };
     })(f);
     reader.readAsText(f);
@@ -153,7 +159,7 @@ function generateTable(json){
         count += 1
     }
 
-    bod.append(newDiv)
+    return newDiv
 }
 
 function getUser(){

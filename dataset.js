@@ -7,9 +7,11 @@ function renderDsPage(ds_id){
         child.remove()
         child = body.lastElementChild
     }
-    
+
+
     let hidden = document.createElement("div")
     hidden.dataset.user_id = user_id
+    hidden.dataset.data_id = ds_id
     hidden.display = "none"
     hidden.id = "user_id"
     body.append(hidden)
@@ -19,19 +21,65 @@ function renderDsPage(ds_id){
         let dataset = user.datasets.find((dataset) => {
             return dataset.id == ds_id
         })
-        
+        renderTopBar(user, body)
+
         let newH1 = document.createElement("h1")
         newH1.innerText = `${user.username}: ${dataset.name}`
         body.append(newH1)
+        addTable(dataset, newH1)
+        let graphsDiv = document.createElement("div")
+        graphsDiv.id = "graphs_div"
+        body.append(graphsDiv)
+        addGraphs(dataset, graphsDiv)
         addGraphForm(user, dataset, body)
-        addTable(dataset)
     })
 }
 
+function addGraphs(dataset, graphsDiv){
+    let child = graphsDiv.lastElementChild
+    while (child){
+        child.remove()
+        child = graphsDiv.lastElementChild
+    }
+    let barGraphs = dataset.bar_graphs
+    let barDiv = document.createElement("div")
+    let barP = document.createElement("p")
+    barDiv.id = "barDiv"
+    barP.innerText = "Bar Graphs"
+    barDiv.append(barP)
+    barGraphs.forEach((graph) => {
+        let newDiv = document.createElement("div")
+        let newP = document.createElement("p")
+        let del = document.createElement("input")
+        del.type = "submit"
+        del.value = "Delete Graph"
+        del.addEventListener("click", (evt) => {
+            let parent = evt.target.parentNode
+            let graph_id = parent.dataset.id
+            fetchDeleteBarGraph(graph_id)
+            .then((r) => {
+                parent.remove()
+            })
+        })
+        newDiv.class = "bar_graph"
+        newDiv.dataset.id = graph.id
+        newP.innerText = graph.title
+        newDiv.append(newP)
+        newDiv.append(del)
+        barDiv.append(newDiv)
+    })
+    graphsDiv.append(barDiv)
+    let lineGraphs = dataset.line_graphs
+    let pieCharts = dataset.pie_charts
+}
+
 function addGraphForm(user, dataset, body){
+    let h3 = document.createElement("h3")
+    h3.innerText = "New Graph Form"
     let arr = ["Bar Graph", "Line Graph", "Pie Chart"]
     let newDiv = document.createElement("div")
     newDiv.id = "graph_form_div"
+    newDiv.append(h3)
     let newSelect = document.createElement("select")
     newSelect.id = "graph_select"
     let optDef = document.createElement("option")
@@ -51,10 +99,11 @@ function addGraphForm(user, dataset, body){
     body.append(newDiv)
 }
 
-function addTable(dataset){
+function addTable(dataset, newH1){
     fetchDataset(dataset)
     .then((file_text) => {
-        generateTable(csvJSON(file_text))
+        let table = generateTable(csvJSON(file_text))
+        insertAfter(table, newH1)
     })
 }
 
@@ -89,22 +138,37 @@ function renderBarForm(dataset, selectBar){
         newDiv.append(newP)
         selectBar.parentNode.insertBefore(newDiv, selectBar.nextSibling)
 
+        let titleLab = document.createElement("label")
+        titleLab.innerText = "Title: "
+        titleLab.for = "graph-title"
+        let title = document.createElement("input")
+        title.type = "text"
+        title.id = "graph-title"
+        title.value = dataset.name
+        newDiv.append(titleLab)
+        newDiv.append(title)
+
         genSelects("X-Axis", newDiv, ds_json)
         genSelects("Series-1", newDiv, ds_json)
 
         let sub = document.createElement("input")
         let del = document.createElement("input")
+        let mkGraph = document.createElement("input")
         sub.type = "submit"
         del.type = "submit"
+        mkGraph.type = "submit"
         sub.value = "New Series"
         del.value = "Remove Series"
+        mkGraph.value = "Create Graph"
         sub.addEventListener("click", (evt) => {
             sub.remove()
             del.remove()
+            mkGraph.remove()
             let count = document.querySelectorAll(".select-div").length
             genSelects(`Series-${count}`, newDiv, ds_json)
             newDiv.append(sub)
             newDiv.append(del)
+            newDiv.append(mkGraph)
         })
         del.addEventListener("click", (evt) => {
             let selects = document.querySelectorAll(".select-div")
@@ -113,8 +177,44 @@ function renderBarForm(dataset, selectBar){
                 last.remove()
             }
         })
+        mkGraph.addEventListener("click", (evt) => {
+            let titleInp = document.getElementById("graph-title")
+            let selects = document.querySelectorAll(".select-div")
+            let submition = {
+                title: titleInp.value,
+                numberOfSeries: selects.length-1
+            }
+            selects.forEach((block) => {
+                let specs = block.querySelectorAll("select")
+                let block_key = block.id.replace(/-/g, "_").replace(/_select_div/, "")
+                submition[block_key] = []
+                specs.forEach((spec) => {
+                    let selOption = spec.options[spec.selectedIndex]
+                    if (selOption.dataset.id){
+                        submition[block_key].push(selOption.dataset.id)
+                    } else {
+                        submition[block_key].push(spec.value)
+                    }
+                })
+            })
+            fetchPersistGraph(dataset.id, submition)
+            .then((newGraph) => {
+                let user_id = document.getElementById("user_id").dataset.user_id
+                let ds_id = document.getElementById("user_id").dataset.data_id
+                fetchUser(user_id)
+                .then((user) => {
+                    let ds = user.datasets.find((dataset) => {
+                        return ds_id == newGraph.dataset_id
+                    })
+                    addGraphs(ds, document.getElementById("graphs_div"))
+                })
+                console.log(newGraph)
+                console.log(JSON.parse(newGraph.flattenedSeries))
+            })
+        })
         newDiv.append(sub)
         newDiv.append(del)
+        newDiv.append(mkGraph)
         
 
     })
@@ -168,6 +268,7 @@ function genSeriesOptions(column_or_row, selectBoxPref, ds_json, id){
         Object.keys(ds_json[0]).forEach((key) => {
             let op = document.createElement("option")
             op.innerText = `${counter}. ${key}`
+            op.dataset.id = counter
             newSelect.append(op)
             counter = counter + 1
         })
@@ -175,6 +276,7 @@ function genSeriesOptions(column_or_row, selectBoxPref, ds_json, id){
         for(let i = 0; i < ds_json.length-1; i++){
             let op = document.createElement("option")
             op.innerText = `Row ${counter}`
+            op.dataset.id = counter
             newSelect.append(op)
             counter = counter + 1
         }
@@ -183,3 +285,4 @@ function genSeriesOptions(column_or_row, selectBoxPref, ds_json, id){
     }
     insertAfter(newSelect, selectBoxPref)
 }
+

@@ -1,14 +1,11 @@
-
-
-document.addEventListener("DOMContentLoaded", (evt) => {
     let bod = document.querySelector("body")
     // constructMain()
     // loggedInTest()
-    datasetTest(28)
+    datasetTest(5)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")
-        newH1.dataset.user_id = 19
+        newH1.dataset.user_id = 9
         bod.append(newH1)
         renderDsPage(ds_id)
     }
@@ -21,6 +18,13 @@ document.addEventListener("DOMContentLoaded", (evt) => {
     }
    
     function constructMain(){
+        let body = document.querySelector("body")
+        let child = body.lastElementChild
+        while(child){
+            child.remove()
+            child = body.lastElementChild
+        }
+
         let newH1 = document.createElement("h1")
         let username = document.createElement("h3")
         let password = document.createElement("h3")
@@ -100,5 +104,3 @@ document.addEventListener("DOMContentLoaded", (evt) => {
     function printLogError(str){
         console.log(str)
     }
-
-})
