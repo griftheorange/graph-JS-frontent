@@ -56,11 +56,6 @@ function renderDatasets(){
 }
 
 function renderDs(evt){
-    getUser()
-    .then((user) => {
-        console.log(user)
-        renderDsPage(evt.target.dataset.ds_id)
-    })
     renderDsPage(evt.target.dataset.ds_id)
 }
 

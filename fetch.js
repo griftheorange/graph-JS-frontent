@@ -3,6 +3,16 @@ function fetchUser(id){
     .then(r => r.json())
 }
 
+function fetchGraph(id){
+    return fetch(`http://localhost:3000/bar_graphs/${id}`)
+    .then(r => r.json())
+    .then((graph) => {
+        graph.flattenedSeries = JSON.parse(graph.flattenedSeries)
+        graph.xAxis = JSON.parse(graph.xAxis)
+        return graph
+    })
+}
+
 function fetchDeleteBarGraph(graph_id){
     return fetch(`http://localhost:3000/bar_graphs/${graph_id}`, {
         method: "DELETE"
@@ -33,7 +43,7 @@ function insertBefore(el, referenceNode) {
     referenceNode.parentNode.insertBefore(el, referenceNode);
 }
 
-function fetchPersistGraph(ds_id, submission){
+function fetchPersistBarGraph(ds_id, submission){
     submission["dataset_id"] = ds_id
     return fetch("http://localhost:3000/bar_graphs", {
         method: "POST",

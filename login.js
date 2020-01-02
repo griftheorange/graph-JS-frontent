@@ -1,7 +1,8 @@
     let bod = document.querySelector("body")
     // constructMain()
     // loggedInTest()
-    datasetTest(5)
+    // datasetTest(11)
+    barGraphShowPage(9, 11, 58)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")

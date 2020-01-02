@@ -55,15 +55,22 @@ function addGraphs(dataset, graphsDiv){
         del.value = "Delete Graph"
         del.addEventListener("click", (evt) => {
             let parent = evt.target.parentNode
-            let graph_id = parent.dataset.id
+            let graph_id = parent.dataset.graph_id
             fetchDeleteBarGraph(graph_id)
             .then((r) => {
                 parent.remove()
             })
         })
         newDiv.class = "bar_graph"
-        newDiv.dataset.id = graph.id
+        newDiv.dataset.graph_id = graph.id
         newP.innerText = graph.title
+        newP.addEventListener("click", () => {
+            let ids = document.getElementById("user_id")
+            let user_id = ids.dataset.user_id
+            let data_id = ids.dataset.data_id
+            let graph_id = newDiv.dataset.graph_id
+            barGraphShowPage(user_id, data_id, graph_id)
+        })
         newDiv.append(newP)
         newDiv.append(del)
         barDiv.append(newDiv)
@@ -197,7 +204,7 @@ function renderBarForm(dataset, selectBar){
                     }
                 })
             })
-            fetchPersistGraph(dataset.id, submition)
+            fetchPersistBarGraph(dataset.id, submition)
             .then((newGraph) => {
                 let user_id = document.getElementById("user_id").dataset.user_id
                 let ds_id = document.getElementById("user_id").dataset.data_id
@@ -208,8 +215,6 @@ function renderBarForm(dataset, selectBar){
                     })
                     addGraphs(ds, document.getElementById("graphs_div"))
                 })
-                console.log(newGraph)
-                console.log(JSON.parse(newGraph.flattenedSeries))
             })
         })
         newDiv.append(sub)
