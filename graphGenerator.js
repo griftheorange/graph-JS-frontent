@@ -32,6 +32,7 @@ function barGraphShowPage(user_id, data_id, graph_id){
                     console.log(jsonifiedCSV)
                     console.log(orderedColumns)
                     console.log(graphData)
+                    
                     let canvas = d3.select("#graph-div")
                                 .append("svg")
                                 .attr("width", 500)
