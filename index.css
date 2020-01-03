@@ -12,6 +12,7 @@ h1.title {
     resize: both;
     overflow: auto;
     margin: auto;
+    margin-bottom: 6em;
 }
 
 body {
