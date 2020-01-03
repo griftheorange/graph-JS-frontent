@@ -1,3 +1,5 @@
+let barDivHeight = 30
+
 function barGraphShowPage(user_id, data_id, graph_id){
     let body = document.querySelector("body")
     let child = body.lastElementChild
@@ -28,21 +30,149 @@ function barGraphShowPage(user_id, data_id, graph_id){
                     let orderedColumns = getOrderedColumns(jsonifiedCSV)
                     let graphData = extractDataArrays(graph, jsonifiedCSV, orderedColumns)
 
-                    console.log(graph)
-                    console.log(jsonifiedCSV)
-                    console.log(orderedColumns)
-                    console.log(graphData)
-                    
-                    let canvas = d3.select("#graph-div")
-                                .append("svg")
-                                .attr("width", 500)
-                                .attr("height", 500)
-
-
+                    renderBarGraph(graph, jsonifiedCSV, orderedColumns, graphData)
             })
         })
     })
     })
+}
+
+function renderBarGraph(graph, json, orderedColumns, graphData){
+
+    let series = Object.keys(graphData)
+    let categories = Object.keys(graphData[1])
+    let values = []
+    let testValues = []
+
+    for(let i = 0; i < categories.length; i++){
+        values
+        testValues.push([])
+        for(let ser in series){
+            values.push(graphData[series[ser]][categories[i]])
+            testValues[i].push(graphData[series[ser]][categories[i]])
+        }
+        values.push(0)
+        values.push(0)
+    }
+
+    let posValues = values.map((num) => {
+        return Math.abs(num)
+    })
+
+    let hasNegatives = !!values.find((num) => {
+        return num < 0
+    })
+    let width = 90
+    let height = 90
+    let bottom = 100
+    let center = 50
+    let heightCorrect = 1.8
+
+    console.log(graphData)
+    console.log(series)
+    console.log(categories)
+    console.log(values)
+
+    let heightScale = d3.scaleLinear()
+                    .domain([0, Math.max(...posValues)])
+                    .range([0, 100])
+
+    let canvas = d3.select("#graph-div")
+                .append("svg")
+                .attr("width", `${width}%`)
+                .attr("height", `${height}%`)
+                
+    let svgClientSize = canvas.node().getBoundingClientRect()
+
+    let axisScale = d3.scaleLinear()
+                    .domain(axisDomain())
+                    .range([0-25, svgClientSize.height])
+
+    function axisDomain(){
+        if(hasNegatives){
+            return [Math.max(...posValues)+(25/svgClientSize.height*Math.max(...posValues)), -Math.max(...posValues)+(25/svgClientSize.height*Math.max(...posValues))]
+        } else {
+            return [Math.max(...posValues)+(25/svgClientSize.height*Math.max(...posValues)), 0]
+        }
+    }
+
+    let axis = d3.axisRight(axisScale)
+
+    canvas.call(axis)
+
+    canvas.append("line")
+            .style("stroke", "black")
+            .style("opacity", '0.5')
+            .attr("x1", "0%")
+            .attr("y1", function(){
+                if (hasNegatives){
+                    return '50%'
+                } else {
+                    return '100%'
+                }
+            })
+            .attr("x2", "100%")
+            .attr("y2", function(){
+                if (hasNegatives){
+                    return '50%'
+                } else {
+                    return '100%'
+                }
+            })
+            
+    let spreadScale = d3.scaleLinear()
+                    .domain([0, values.length])
+                    .range([0, 100])
+    
+    let color = d3.scaleLinear()
+                .domain([0, series.length-1])
+                .range(["green", "#cbdb14"])
+
+    let bars = canvas.selectAll("div")
+                .data(values)
+                .enter()
+                    .append("rect")
+                    .attr("width", `${(100/values.length)/2}%`)
+                    .attr("height", function(d){
+                        if (hasNegatives){
+                            return `${heightScale(Math.abs(d))/2}%`
+                        } else {
+                            return `${heightScale(Math.abs(d))}%`
+                        }
+                    })
+                    .attr("position", "fixed")
+                    .attr("y", function(d){
+                        if (hasNegatives){
+                            if(d < 0){
+                                return `${center}%`
+                            } else {
+                                return `${center - heightScale(d)/2}%`
+                            }
+                        } else {
+                            return `${bottom - heightScale(d)}%`
+                        }
+                    })
+                    .attr("x", function(d, i){
+                        return `${spreadScale(i)+((100/values.length)/2)/2}%`
+                    })
+                    .attr("fill", function(d, i){
+                        return color((i)%(series.length+2))
+                    })
+                    .attr("id", function(d, i){return i})
+                    
+    let legend = canvas.selectAll("div")
+                .data(series)
+                .enter()
+                    .append("rect")
+                    .attr("width", `2%`)
+                    .attr("height", `1%`)
+                    .attr("y", function(d, i){
+                        return `${i*5}%`
+                    })
+                    .attr("x", '90%')
+                    .attr("fill", function(d, i){
+                        return color(i)
+                    })
 }
 
 function barGraphDivs(body, graph){
@@ -54,6 +184,8 @@ function barGraphDivs(body, graph){
     descDiv.id = "desc-div"
     let graphDiv = document.createElement("div")
     graphDiv.id = "graph-div"
+    graphDiv.style.width = "90%"
+    graphDiv.style.height = `${barDivHeight}em`
     headerDiv.append(titleDiv)
     headerDiv.append(descDiv)
 
@@ -140,7 +272,12 @@ function aggregateByUniques(x, series){
 
     for (let key in aggHash){
         for (let j = 0; j < x.length; j++){
-            aggHash[key][x[j]] = aggHash[key][x[j]] + parseFloat(series[key-1][j])
+            if(Object.is(parseFloat(series[key-1][j]), NaN)){
+                continue
+            } else {
+                aggHash[key][x[j]] = aggHash[key][x[j]] + parseFloat(series[key-1][j])
+            }
+            
         }
     }
     return aggHash

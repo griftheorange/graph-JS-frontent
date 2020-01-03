@@ -2,7 +2,7 @@
     // constructMain()
     // loggedInTest()
     // datasetTest(11)
-    barGraphShowPage(9, 11, 58)
+    barGraphShowPage(9, 29, 100)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")

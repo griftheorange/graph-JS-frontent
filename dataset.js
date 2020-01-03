@@ -110,7 +110,8 @@ function addTable(dataset, newH1){
     fetchDataset(dataset)
     .then((file_text) => {
         let table = generateTable(csvJSON(file_text))
-        insertAfter(table, newH1)
+        // insertAfter(table, newH1)
+        document.querySelector("body").append(table)
     })
 }
 
@@ -211,7 +212,7 @@ function renderBarForm(dataset, selectBar){
                 fetchUser(user_id)
                 .then((user) => {
                     let ds = user.datasets.find((dataset) => {
-                        return ds_id == newGraph.dataset_id
+                        return dataset.id == newGraph.dataset_id
                     })
                     addGraphs(ds, document.getElementById("graphs_div"))
                 })

@@ -104,7 +104,7 @@ function csvUploadedEvent(evt) {
 
 //sourced from https://gist.github.com/iwek/7154578
 function csvJSON(csv){
-    csv = csv.replace(/"/g,"")
+    csv = csv.replace(/"/g, "").replace(/,+/g, ",").replace(/\$/g, "")
     let lines = csv.split("\n");
     let result = [];
     let headers = lines[0].split(",");

@@ -1,0 +1,14 @@
+#graph-div {
+    border: 2px solid black;
+    resize: both;
+    overflow: auto;
+    display: flex;
+}
+
+svg {
+    margin: auto;
+}
+
+td {
+    font-size: 0.5em;
+}
