@@ -4,6 +4,10 @@
     overflow: auto;
 }
 
+body {
+    background-color: #ebffbc;
+}
+
 svg {
     margin: auto;
     display: flex;
@@ -12,4 +16,102 @@ svg {
 
 td {
     font-size: 0.5em;
+}
+
+h1, h2, h3, h4, label{
+    text-align: center;
+}
+
+input, select, textarea {
+    display: block;
+    margin: auto;
+    margin-bottom: 1em;
+    background-color: #a5da3c5c;
+    border-color: #5661425c;
+}
+
+#log-container h3{
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+#topbar {
+    display: flex;
+    padding: 1em;
+    background-color: #a5da3c5c;
+}
+
+#topbar p{
+    text-align: center;
+    margin: auto;
+    width: 45%;
+    padding: 1em;
+    background-color: #87b53e4f;
+}
+
+p {
+    text-align: center;
+}
+
+input[type="file"]{
+    width: 15em;
+}
+
+h1, h2, h3, h4, h5, p, label{
+    color: #566142f2;
+}
+
+table {
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #566142f2;
+    color: #3d4235f2
+}
+
+td {
+    font-size: 0.7em; 
+}
+
+th {
+    font-size: 1em;
+}
+
+.select-div{
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    margin-left:35%;
+}
+
+.select-div > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#title-div-center{
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    margin-left:35%;
+}
+
+#title-div-center > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#desc-div {
+    display: flex;
+    flex-direction: column;
+}
+
+#desc-div > * {
+    margin: auto;
+    margin-bottom: 1em;
+}
+
+textarea {
+    width: 25%;
 }

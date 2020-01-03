@@ -39,12 +39,17 @@ function barGraphShowPage(user_id, data_id, graph_id){
 
 function renderBarGraph(graph, json, orderedColumns, graphData){
 
-    console.log(json)
-
     let series = Object.keys(graphData)
+    let seriesNames = []
     let categories = Object.keys(graphData[1])
     let values = []
     let testValues = []
+
+    for(let key in graph.flattenedSeries){
+        if(graph.flattenedSeries[key][0] == "Column"){
+            seriesNames.push(`: ${Object.keys(json[0])[graph.flattenedSeries[key][1]-1]}`)
+        }
+    }
 
     for(let i = 0; i < categories.length; i++){
         values
@@ -79,6 +84,7 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
                 .style("margin-top", "1%")
                 .attr("width", `${width}%`)
                 .attr("height", `${height}%`)
+                .append("g")
 
     let bottomLabel = d3.select("#graph-div")
                         .append("svg")
@@ -98,7 +104,7 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
                             .attr("y", '5%')
                             .text(function(d){return d})
                 
-    let svgClientSize = canvas.node().getBoundingClientRect()
+    let svgClientSize = canvas.node().parentNode.getBoundingClientRect()
 
     let axisScale = d3.scaleLinear()
                     .domain(axisDomain())
@@ -149,13 +155,7 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
                 .enter()
                     .append("rect")
                     .attr("width", `${(100/values.length)/2}%`)
-                    .attr("height", function(d){
-                        if (hasNegatives){
-                            return `${heightScale(Math.abs(d))/2}%`
-                        } else {
-                            return `${heightScale(Math.abs(d))}%`
-                        }
-                    })
+                    .attr("height", 0)
                     .attr("position", "fixed")
                     .attr("y", function(d){
                         if (hasNegatives){
@@ -168,14 +168,49 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
                             return `${bottom - heightScale(d)}%`
                         }
                     })
-                    .attr("x", function(d, i){
-                        return `${spreadScale(i)+((100/values.length)/2)/2}%`
-                    })
+                    .attr("x", 0)
                     .attr("fill", function(d, i){
                         return color((i)%(series.length+2))
                     })
                     .attr("id", function(d, i){return i})
-                    
+    
+    bars.transition()
+        .duration(1500)
+        .attr("height", function(d){
+            if (hasNegatives){
+                return `${heightScale(Math.abs(d))/2}%`
+            } else {
+                return `${heightScale(Math.abs(d))}%`
+            }
+        })
+        // .attr("x", function(d, i){
+        //     return `${spreadScale(i)+((100/values.length)/2)/2}%`
+        // })
+    
+    bars.transition()
+        .delay(1500)
+        .duration(5000)
+        .attr("x", function(d, i){
+            return `${spreadScale(i)+((100/values.length)/2)/2}%`
+        })
+
+
+    let labels = canvas.selectAll("div")
+                .data(values)
+                .enter()
+                    .append("text")
+                    .attr("y", "55%")
+                    .attr("x", function(d, i){
+                        return `${spreadScale(i)+((100/values.length)/2)/2 + ((100/values.length)/4)}%`
+                    })
+                    .attr("display", function(d){
+                        if(d == 0 || values.length > 100){
+                            return "none"
+                        }
+                    })
+                    .attr("style", "stroke: #660000; fill: #660000; font-size: 1em; writing-mode: tb;")
+                    .text(function(d){return d.toFixed(2)})
+
     let legend = canvas.selectAll("div")
                 .data(series)
                 .enter()
@@ -194,12 +229,11 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
 
     legend.append("text")
             .attr("style", "stroke: #660000; fill: #660000")
-            .attr("text-anchor", "middle")
             .attr("y", function(d, i){
                 return `${(i+0.8)*5}%`
             })
             .attr("x", '90%')
-            .text(function(d){return `Series ${d}`})
+            .text(function(d){return `Series ${d}${seriesNames[d-1]}`})
 }
 
 function barGraphDivs(body, graph){
@@ -222,7 +256,15 @@ function barGraphDivs(body, graph){
 
     let description = document.createElement("textarea")
     description.value = graph.description
+    let updateDesc = document.createElement("input")
+    updateDesc.type = "submit"
+    updateDesc.value = "Update Decsription"
+    updateDesc.addEventListener("click", (evt) => {
+        fetchUpdateGraphDescription(description.value, graph.id)
+        .then(console.log)
+    })
     descDiv.append(description)
+    descDiv.append(updateDesc)
 
 
     body.append(headerDiv)
@@ -240,6 +282,7 @@ function getOrderedColumns(json){
 }
 
 function extractDataArrays(graph, json, orderedColumns){
+    console.log(graph)
     let dataHash = {
         x: []
     }

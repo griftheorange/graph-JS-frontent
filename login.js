@@ -1,8 +1,8 @@
     let bod = document.querySelector("body")
-    // constructMain()
+    constructMain()
     // loggedInTest()
-    // datasetTest(11)
-    barGraphShowPage(9, 29, 100)
+    // datasetTest(27)
+    // barGraphShowPage(9, 29, 100)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")
@@ -27,6 +27,8 @@
         }
 
         let newH1 = document.createElement("h1")
+        let logContainer = document.createElement("div")
+        logContainer.id = "log-container"
         let username = document.createElement("h3")
         let password = document.createElement("h3")
         let log = document.createElement("h4")
@@ -42,9 +44,10 @@
         cre.innerText = "Create Account"
         cre.addEventListener("click", createClick)
 
+        logContainer.append(username)
+        logContainer.append(password)
         bod.append(newH1)
-        bod.append(username)
-        bod.append(password)
+        bod.append(logContainer)
         bod.append(log)
         bod.append(cre)
     }

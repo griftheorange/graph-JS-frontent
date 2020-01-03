@@ -55,6 +55,18 @@ function fetchPersistBarGraph(ds_id, submission){
     .then(r => r.json())
 }
 
+function fetchUpdateGraphDescription(value, id){
+    return fetch(`http://localhost:3000/bar_graphs/${id}`, {
+        method: "PATCH",
+        headers: {
+            "content-type":"application/json"
+        },
+        body: JSON.stringify({
+            description: value
+        })
+    })
+}
+
 function renderTopBar(user, body){
     let newDiv = document.createElement("div")
     newDiv.id = "topbar"

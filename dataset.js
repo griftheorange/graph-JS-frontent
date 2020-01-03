@@ -146,6 +146,8 @@ function renderBarForm(dataset, selectBar){
         newDiv.append(newP)
         selectBar.parentNode.insertBefore(newDiv, selectBar.nextSibling)
 
+        let titleDiv = document.createElement("div")
+        titleDiv.id = "title-div-center"
         let titleLab = document.createElement("label")
         titleLab.innerText = "Title: "
         titleLab.for = "graph-title"
@@ -153,8 +155,9 @@ function renderBarForm(dataset, selectBar){
         title.type = "text"
         title.id = "graph-title"
         title.value = dataset.name
-        newDiv.append(titleLab)
-        newDiv.append(title)
+        titleDiv.append(titleLab)
+        titleDiv.append(title)
+        newDiv.append(titleDiv)
 
         genSelects("X-Axis", newDiv, ds_json)
         genSelects("Series-1", newDiv, ds_json)
@@ -181,6 +184,7 @@ function renderBarForm(dataset, selectBar){
         del.addEventListener("click", (evt) => {
             let selects = document.querySelectorAll(".select-div")
             let last = selects[selects.length-1]
+            debugger
             if (last.id != "X-Axis-select-div" && last.id != "Series-1-select-div"){
                 last.remove()
             }
