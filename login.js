@@ -1,12 +1,12 @@
     let bod = document.querySelector("body")
-    constructMain()
+    // constructMain()
     // loggedInTest()
-    // datasetTest(27)
+    datasetTest(43)
     // barGraphShowPage(9, 29, 100)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")
-        newH1.dataset.user_id = 9
+        newH1.dataset.user_id = 13
         bod.append(newH1)
         renderDsPage(ds_id)
     }
@@ -27,6 +27,7 @@
         }
 
         let newH1 = document.createElement("h1")
+        newH1.classList.add("title")
         let logContainer = document.createElement("div")
         logContainer.id = "log-container"
         let username = document.createElement("h3")
@@ -75,34 +76,58 @@
         let submit = document.createElement("input")
         submit.type = "submit"
         submit.value = "Submit"
-        submit.addEventListener("click", evt => submitClickEventHandler(evt, tf_1, tf_2))
+        submit.addEventListener("click", evt => submitClickEventHandler(evt, tf_1, tf_2, buttonType))
         
         insertAfter(tf_1, user)
         insertAfter(submit, pass)
         insertAfter(tf_2, pass)
     }
 
-    function submitClickEventHandler(evt, tf_1, tf_2){
-        let userInput = tf_1.value
-        let passInput = tf_2.value 
-        fetch("http://localhost:3000/users")
-        .then(r => r.json())
-        .then((users) => {
-            let found = users.find((user) => {
-                return user.username == userInput
-            })
-            if(found && tf_1.id == "username_login"){
-                if(found.password == passInput){
-                    renderMainMenu(found, bod)
-                } else {
-                    printLogError("No username matching that password")
+    function submitClickEventHandler(evt, tf_1, tf_2, buttonType){
+        if(buttonType == "login"){
+            let userInput = tf_1.value
+            let passInput = tf_2.value 
+            fetch("http://localhost:3000/users")
+            .then(r => r.json())
+            .then((users) => {
+                let found = users.find((user) => {
+                    return user.username == userInput
+                })
+                if(found && tf_1.id == "username_login"){
+                    if(found.password == passInput){
+                        renderMainMenu(found, bod)
+                    } else {
+                        alert("No username matching that password")
+                    }
+                } else {            
+                    alert("Incorrect input")
                 }
-            } else if(!found && tf_1.id == "username_create" && passInput != ""){
-                console.log("successful create")
-            } else {            
-                printLogError("Incorrect input")
-            }
-        })
+            })
+        } else {
+            let userInput = tf_1.value
+            let passInput = tf_2.value
+            fetch("http://localhost:3000/users")
+            .then(r => r.json())
+            .then((users) => {
+                let found = users.find((user) => {
+                    return user.username == userInput
+                })
+                if(!found && tf_1.id == "username_create"){
+                    if(passInput != "" && userInput != ""){
+                        fetchCreateUser(userInput, passInput)
+                        .then((newUser) => {
+                            renderMainMenu(newUser, bod)
+                        })
+                    } else {
+                        alert("You need a username and password")
+                    }
+                } else if(found && tf_1.id == "username_create"){
+                    alert("Username already exists")
+                } else {            
+                    printLogError("Incorrect input")
+                }
+            })
+        }
     }
 
     function printLogError(str){

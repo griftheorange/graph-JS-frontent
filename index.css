@@ -1,7 +1,17 @@
+* {
+    font-family: futura;
+}
+
+h1.title {
+    margin-top: 3em;
+    margin-bottom: 1em;
+}
+
 #graph-div {
-    border: 2px solid black;
+    border: 2px solid #566142f2;
     resize: both;
     overflow: auto;
+    margin: auto;
 }
 
 body {
@@ -114,4 +124,60 @@ th {
 
 textarea {
     width: 25%;
+}
+
+.title, #log-container > h3, h4  {  
+    animation: 1s ease-out 0s 1 slideInFromTop;
+}
+
+input, select {
+    animation: 1s ease-out 0s 1 fadeIn;
+}
+
+@keyframes slideInFromTop {
+    0% {
+        transform: translateY(-20em);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-300%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+table {
+    animation: 1s ease-out 0s 1 fadeIn;
+}
+
+.title {
+    font-size: 3em;
+}
+
+.graphDiv {
+    width: 30%;
+    margin: auto;
+    background-color: #cce49ff2;
+    padding-top: 0.1em;
+    padding-bottom: 0.1em;
+    margin-top: 0.2em;
+    margin-bottom: 0.5em;
 }

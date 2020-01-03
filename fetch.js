@@ -3,6 +3,19 @@ function fetchUser(id){
     .then(r => r.json())
 }
 
+function fetchCreateUser(username, pass){
+    return fetch(`http://localhost:3000/users`, {
+        method: "POST",
+        headers: {
+            "content-type":"application/json"
+        },
+        body: JSON.stringify({
+            username: username,
+            password: pass
+        })
+    }).then(r => r.json())
+}
+
 function fetchGraph(id){
     return fetch(`http://localhost:3000/bar_graphs/${id}`)
     .then(r => r.json())
@@ -13,8 +26,24 @@ function fetchGraph(id){
     })
 }
 
+function fetchLineGraph(id){
+    return fetch(`http://localhost:3000/line_graphs/${id}`)
+    .then(r => r.json())
+    .then((graph) => {
+        graph.flattenedSeries = JSON.parse(graph.flattenedSeries)
+        graph.xAxis = JSON.parse(graph.xAxis)
+        return graph
+    })
+}
+
 function fetchDeleteBarGraph(graph_id){
     return fetch(`http://localhost:3000/bar_graphs/${graph_id}`, {
+        method: "DELETE"
+    })
+}
+
+function fetchDeleteLineGraph(graph_id){
+    return fetch(`http://localhost:3000/line_graphs/${graph_id}`, {
         method: "DELETE"
     })
 }
@@ -55,8 +84,21 @@ function fetchPersistBarGraph(ds_id, submission){
     .then(r => r.json())
 }
 
-function fetchUpdateGraphDescription(value, id){
-    return fetch(`http://localhost:3000/bar_graphs/${id}`, {
+function fetchPersistLineGraph(ds_id, submission){
+    submission["dataset_id"] = ds_id
+    return fetch("http://localhost:3000/line_graphs", {
+        method: "POST",
+        headers: {
+            "content-type":"application/json"
+        },
+        body: JSON.stringify(submission)
+    })
+    .then(r => r.json())
+}
+
+function fetchUpdateGraphDescription(value, id, chartType){
+    console.log(chartType)
+    return fetch(`http://localhost:3000/${chartType.toLowerCase()}_graphs/${id}`, {
         method: "PATCH",
         headers: {
             "content-type":"application/json"
@@ -80,7 +122,7 @@ function renderTopBar(user, body){
     log.addEventListener("click", (evt) => {
         constructMain()
     })
-    newDiv.append(main)
     newDiv.append(log)
+    newDiv.append(main)
     body.append(newDiv)
 }

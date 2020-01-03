@@ -35,18 +35,44 @@ function renderDsPage(ds_id){
     })
 }
 
+function renderDsPageLink(data_id, user_id){
+    let body = document.querySelector("body")
+    let child = body.lastElementChild
+
+    while(child){
+        child.remove()
+        child = body.lastElementChild
+    }
+
+    let trackH1 = document.createElement("h1")
+    trackH1.style = "display: none"
+    trackH1.dataset.user_id = user_id
+    body.append(trackH1)
+
+    renderDsPage(data_id)
+}
+
 function addGraphs(dataset, graphsDiv){
     let child = graphsDiv.lastElementChild
     while (child){
         child.remove()
         child = graphsDiv.lastElementChild
     }
+
     let barGraphs = dataset.bar_graphs
+    let lineGraphs = dataset.line_graphs
     let barDiv = document.createElement("div")
     let barP = document.createElement("p")
+    let lineDiv = document.createElement("div")
+    let lineP = document.createElement("p")
     barDiv.id = "barDiv"
+    barDiv.classList.add("graphDiv")
     barP.innerText = "Bar Graphs"
+    lineDiv.id = "lineDiv"
+    lineDiv.classList.add("graphDiv")
+    lineP.innerText = "Line Graphs"
     barDiv.append(barP)
+    lineDiv.append(lineP)
     barGraphs.forEach((graph) => {
         let newDiv = document.createElement("div")
         let newP = document.createElement("p")
@@ -75,8 +101,36 @@ function addGraphs(dataset, graphsDiv){
         newDiv.append(del)
         barDiv.append(newDiv)
     })
+    lineGraphs.forEach((graph) => {
+        let newDiv = document.createElement("div")
+        let newP = document.createElement("p")
+        let del = document.createElement("input")
+        del.type = "submit"
+        del.value = "Delete Graph"
+        del.addEventListener("click", (evt) => {
+            let parent = evt.target.parentNode
+            let graph_id = parent.dataset.graph_id
+            fetchDeleteLineGraph(graph_id)
+            .then((r) => {
+                parent.remove()
+            })
+        })
+        newDiv.class = "line_graph"
+        newDiv.dataset.graph_id = graph.id
+        newP.innerText = graph.title
+        newP.addEventListener("click", () => {
+            let ids = document.getElementById("user_id")
+            let user_id = ids.dataset.user_id
+            let data_id = ids.dataset.data_id
+            let graph_id = newDiv.dataset.graph_id
+            lineGraphShowPage(user_id, data_id, graph_id)
+        })
+        newDiv.append(newP)
+        newDiv.append(del)
+        lineDiv.append(newDiv)
+    })
     graphsDiv.append(barDiv)
-    let lineGraphs = dataset.line_graphs
+    graphsDiv.append(lineDiv)
     let pieCharts = dataset.pie_charts
 }
 
@@ -120,10 +174,10 @@ function createNewGraphHandler(evt, dataset){
     
     switch(selectBar.value){
         case "Bar Graph":
-            renderBarForm(dataset, selectBar)
+            renderChartForm(dataset, selectBar, "Bar")
             break;
         case "Line Graph":
-            renderLineForm(dataset, selectBar)
+            renderChartForm(dataset, selectBar, "Line")
             break;
         case "Pie Chart":
             renderPieForm(dataset, selectBar)
@@ -132,7 +186,7 @@ function createNewGraphHandler(evt, dataset){
     }
 }
 
-function renderBarForm(dataset, selectBar){
+function renderChartForm(dataset, selectBar, chartType){
     fetchDataset(dataset)
     .then((ds_json) => {
         ds_json = csvJSON(ds_json)
@@ -142,7 +196,7 @@ function renderBarForm(dataset, selectBar){
         let newDiv = document.createElement("div")
         newDiv.id = "graph-gen"
         let newP = document.createElement("p")
-        newP.innerText = "Bar Graph Specs:"
+        newP.innerText = `${chartType} Graph Specs:`
         newDiv.append(newP)
         selectBar.parentNode.insertBefore(newDiv, selectBar.nextSibling)
 
@@ -209,8 +263,9 @@ function renderBarForm(dataset, selectBar){
                     }
                 })
             })
-            fetchPersistBarGraph(dataset.id, submition)
-            .then((newGraph) => {
+            if (chartType == "Bar"){
+                fetchPersistBarGraph(dataset.id, submition)
+                .then((newGraph) => {
                 let user_id = document.getElementById("user_id").dataset.user_id
                 let ds_id = document.getElementById("user_id").dataset.data_id
                 fetchUser(user_id)
@@ -221,6 +276,21 @@ function renderBarForm(dataset, selectBar){
                     addGraphs(ds, document.getElementById("graphs_div"))
                 })
             })
+            } else {
+                fetchPersistLineGraph(dataset.id, submition)
+                .then((newGraph) => {
+                    console.log(newGraph)
+                let user_id = document.getElementById("user_id").dataset.user_id
+                let ds_id = document.getElementById("user_id").dataset.data_id
+                fetchUser(user_id)
+                .then((user) => {
+                    let ds = user.datasets.find((dataset) => {
+                        return dataset.id == newGraph.dataset_id
+                    })
+                    addGraphs(ds, document.getElementById("graphs_div"))
+                })
+            })
+            }
         })
         newDiv.append(sub)
         newDiv.append(del)
