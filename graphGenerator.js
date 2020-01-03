@@ -39,6 +39,8 @@ function barGraphShowPage(user_id, data_id, graph_id){
 
 function renderBarGraph(graph, json, orderedColumns, graphData){
 
+    console.log(json)
+
     let series = Object.keys(graphData)
     let categories = Object.keys(graphData[1])
     let values = []
@@ -68,19 +70,33 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
     let center = 50
     let heightCorrect = 1.8
 
-    console.log(graphData)
-    console.log(series)
-    console.log(categories)
-    console.log(values)
-
     let heightScale = d3.scaleLinear()
                     .domain([0, Math.max(...posValues)])
                     .range([0, 100])
 
     let canvas = d3.select("#graph-div")
                 .append("svg")
+                .style("margin-top", "1%")
                 .attr("width", `${width}%`)
                 .attr("height", `${height}%`)
+
+    let bottomLabel = d3.select("#graph-div")
+                        .append("svg")
+                        .attr("width", `${width}%`)
+                        .attr("height", `${height}%`)
+                        .append("g")
+                        .attr("id", "bottom-axis")
+                        .selectAll("div")
+                        .data(categories)
+                        .enter()
+                            .append("text")
+                            .attr("style", "stroke: #660000; fill: #660000; font-size: 0.5em; stroke-width: 0.01em;")
+                            .attr("text-anchor", "middle")
+                            .attr("x", function(d, i){
+                                return `${(100/categories.length * (i+1))-(100/categories.length*0.65)}%`
+                            })
+                            .attr("y", '5%')
+                            .text(function(d){return d})
                 
     let svgClientSize = canvas.node().getBoundingClientRect()
 
@@ -163,16 +179,27 @@ function renderBarGraph(graph, json, orderedColumns, graphData){
     let legend = canvas.selectAll("div")
                 .data(series)
                 .enter()
-                    .append("rect")
-                    .attr("width", `2%`)
-                    .attr("height", `1%`)
-                    .attr("y", function(d, i){
-                        return `${i*5}%`
-                    })
-                    .attr("x", '90%')
-                    .attr("fill", function(d, i){
-                        return color(i)
-                    })
+                    .append("g")
+
+    legend.append("rect")
+            .attr("width", `2%`)
+            .attr("height", `1%`)
+            .attr("y", function(d, i){
+                return `${(i+1)*5}%`
+            })
+            .attr("x", '90%')
+            .attr("fill", function(d, i){
+                return color(i)
+            })
+
+    legend.append("text")
+            .attr("style", "stroke: #660000; fill: #660000")
+            .attr("text-anchor", "middle")
+            .attr("y", function(d, i){
+                return `${(i+0.8)*5}%`
+            })
+            .attr("x", '90%')
+            .text(function(d){return `Series ${d}`})
 }
 
 function barGraphDivs(body, graph){
