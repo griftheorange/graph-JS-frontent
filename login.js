@@ -1,7 +1,7 @@
     let bod = document.querySelector("body")
-    // constructMain()
+    constructMain()
     // loggedInTest()
-    datasetTest(43)
+    // datasetTest(43)
     // barGraphShowPage(9, 29, 100)
 
     function datasetTest(ds_id){
