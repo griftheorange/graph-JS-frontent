@@ -131,7 +131,7 @@ textarea {
     animation: 1s ease-out 0s 1 slideInFromTop;
 }
 
-input, select {
+input, select, table {
     animation: 1s ease-out 0s 1 fadeIn;
 }
 
@@ -163,10 +163,6 @@ input, select {
     100% {
         opacity: 1;
     }
-}
-
-table {
-    animation: 1s ease-out 0s 1 fadeIn;
 }
 
 .title {

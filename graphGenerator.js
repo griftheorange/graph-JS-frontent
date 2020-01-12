@@ -1,4 +1,4 @@
-let barDivHeight = 30
+let barDivHeight = 38
 
 function prepPage(user_id, data_id, graph_id, body){
     let child = body.lastElementChild
@@ -13,6 +13,41 @@ function prepPage(user_id, data_id, graph_id, body){
     dataStore.dataset.data_id = data_id
     dataStore.diplay = "none"
     body.append(dataStore)
+}
+
+function pieGraphShowPage(user_id, data_id, graph_id){
+    let body = document.querySelector("body")
+    prepPage(user_id, data_id, graph_id, body)
+
+    fetchUser(user_id)
+    .then(user => renderTopBar(user, body))
+    .then((r) => {
+        let topBarData = document.createElement("p")
+        let topBar = document.getElementById("topbar")
+        topBarData.innerText = "Dataset"
+        topBarData.addEventListener("click", (evt) => {
+            renderDsPageLink(data_id, user_id)
+        })
+        topBar.append(topBarData)
+        fetchPieGraph(graph_id)
+        .then((graph) => {
+            graphDivs(body, graph, "Pie")
+            fetch(`http://localhost:3000/datasets/${data_id}`)
+            .then(r => r.json())
+            .then((dataset) => {
+                fetchDataset(dataset)
+                .then((csv) => {
+                    let jsonifiedCSV = csvJSON(csv)
+                    let orderedColumns = getOrderedColumns(jsonifiedCSV)
+                    let graphData = extractDataArrays(graph, jsonifiedCSV, orderedColumns)
+
+                    // renderBarGraph(graph, jsonifiedCSV, orderedColumns, graphData)
+                    // renderLineGraph(graph, jsonifiedCSV, orderedColumns, graphData)
+                    renderPieGraph(graph, jsonifiedCSV, orderedColumns, graphData)
+                })
+            })
+        })
+    })
 }
 
 function lineGraphShowPage(user_id, data_id, graph_id){
@@ -85,7 +120,7 @@ function barGraphShowPage(user_id, data_id, graph_id){
 function renderLineGraph(graph, json, orderedColumns, graphData){
 
     let width = 90
-    let height = 90
+    let height = 100
     let values = []
     let series = []
     let dates = []
@@ -160,7 +195,7 @@ function renderLineGraph(graph, json, orderedColumns, graphData){
         .data(graphData[ser])
         .enter()
             .append("circle")
-            .attr("r", "0.15em")
+            .attr("r", "0.2em")
             .attr("cx", function(d, i){
                 return `${xScale(graphData["x"][i])}%`
             })
@@ -252,6 +287,119 @@ function renderLineGraph(graph, json, orderedColumns, graphData){
             })
             .attr("x", '90%')
             .text(function(d){return `${seriesNames[d-1]}`})
+}
+
+function renderPieGraph(graph, json, orderedColumns, graphData){
+    let total = 0
+    for (let key in graphData[1]){
+        total += Math.abs(graphData[1][key])
+    }
+    let series = Object.keys(graphData)
+    let seriesNames = []
+    let categories = Object.keys(graphData[1])
+    let values = []
+    let testValues = []
+
+    console.log(graph)
+    console.log(json)
+    console.log(orderedColumns)
+    console.log(graphData)
+    console.log(total)
+
+    for(let key in graph.flattenedSeries){
+        if(graph.flattenedSeries[key][0] == "Column"){
+            seriesNames.push(`: ${Object.keys(json[0])[graph.flattenedSeries[key][1]-1]}`)
+        }
+    }
+
+    for(let i = 0; i < categories.length; i++){
+        values
+        testValues.push([])
+        for(let ser in series){
+            values.push(graphData[series[ser]][categories[i]])
+            testValues[i].push(graphData[series[ser]][categories[i]])
+        }
+    }
+
+    let sortedValues = [...values]
+    sortedValues.sort(function(a, b){return a-b})
+    let negValuesTrack = sortedValues.filter((value) => {return value <= 0})
+    let posValuesTrack = sortedValues.filter((value) => {return value > 0})
+
+    let posValues = values.map((num) => {
+        return Math.abs(num)
+    })
+
+    let hasNegatives = !!values.find((num) => {
+        return num < 0
+    })
+
+    let width = 90
+    let height = 90
+    let bottom = 100
+    let center = 50
+    let heightCorrect = 1.8
+
+    let canvas = d3.select("#graph-div")
+                .append("svg")
+                .style("margin-top", "1%")
+                .attr("width", `${width}%`)
+                .attr("height", `${height}%`)
+                .append("svg")
+                .attr("x", "25%")
+                .attr("y", "0%")
+                .append("g")
+                .attr("class", "pie-group")
+
+    let parent = canvas.node().parentNode.parentNode
+    let svgClientSize = parent.getBoundingClientRect()
+    canvas
+        .attr("transform", `translate(${svgClientSize.x*2}, ${svgClientSize.y})`)
+
+    let negColor = d3.scaleLinear()
+        .domain([0, negValuesTrack.length/3, negValuesTrack.length/3*2, negValuesTrack.length])
+        .range(["#a11003", "red" ,"orange", "yellow"])
+                
+    let posColor = d3.scaleLinear()
+        .domain([0, posValuesTrack.length/3, posValuesTrack.length])
+        .range(["#00570d", "#0f8020", "#7eb51f", ])
+
+    let arc = d3.arc()
+        .innerRadius(svgClientSize.y/2.3)
+        .outerRadius(svgClientSize.y/1.15)
+
+    let pie = d3.pie()
+        .value(function (d) { return Math.abs(d) })
+        .sort(null)
+        .padAngle(0.02)
+
+    let arcs = canvas.selectAll(".arc")
+        .data(pie(sortedValues))
+        .enter()
+        .append('g')
+        .attr("class", "arc")
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", function(d){
+            console.log(d)
+            if(d.data <= 0){
+                return negColor(d.index)
+            } else {
+                return posColor(d.index-negValuesTrack.length)
+            }
+        })
+        .attr("stroke", function(d){
+            if(d.data <= 0){
+                return negColor(d.index)
+            } else {
+                return posColor(d.index-negValuesTrack.length)
+            }
+        })
+        .attr("opacity", "1")
+        .attr("stroke-width", "3px")
+        .attr("x", "50%")
+        .attr("y", "50%")
 }
 
 function renderBarGraph(graph, json, orderedColumns, graphData){

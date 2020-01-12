@@ -1,8 +1,8 @@
     let bod = document.querySelector("body")
-    constructMain()
+    // constructMain()
     // loggedInTest()
     // datasetTest(43)
-    // barGraphShowPage(9, 29, 100)
+    pieGraphShowPage(18, 44, 5)
 
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")

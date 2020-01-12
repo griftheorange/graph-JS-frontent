@@ -36,6 +36,16 @@ function fetchLineGraph(id){
     })
 }
 
+function fetchPieGraph(id){
+    return fetch(`http://localhost:3000/pie_graphs/${id}`)
+    .then(r => r.json())
+    .then((graph) => {
+        graph.flattenedSeries = JSON.parse(graph.flattenedSeries)
+        graph.xAxis = JSON.parse(graph.xAxis)
+        return graph
+    })
+}
+
 function fetchDeleteBarGraph(graph_id){
     return fetch(`http://localhost:3000/bar_graphs/${graph_id}`, {
         method: "DELETE"
@@ -44,6 +54,12 @@ function fetchDeleteBarGraph(graph_id){
 
 function fetchDeleteLineGraph(graph_id){
     return fetch(`http://localhost:3000/line_graphs/${graph_id}`, {
+        method: "DELETE"
+    })
+}
+
+function fetchDeletePieGraph(graph_id){
+    return fetch(`http://localhost:3000/pie_graphs/${graph_id}`, {
         method: "DELETE"
     })
 }
@@ -96,8 +112,19 @@ function fetchPersistLineGraph(ds_id, submission){
     .then(r => r.json())
 }
 
+function fetchPersistPieGraph(ds_id, submission){
+    submission["dataset_id"] = ds_id
+    return fetch("http://localhost:3000/pie_graphs", {
+        method: "POST",
+        headers: {
+            "content-type":"application/json"
+        },
+        body: JSON.stringify(submission)
+    })
+    .then(r => r.json())
+}
+
 function fetchUpdateGraphDescription(value, id, chartType){
-    console.log(chartType)
     return fetch(`http://localhost:3000/${chartType.toLowerCase()}_graphs/${id}`, {
         method: "PATCH",
         headers: {

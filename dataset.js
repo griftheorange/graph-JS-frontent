@@ -61,18 +61,25 @@ function addGraphs(dataset, graphsDiv){
 
     let barGraphs = dataset.bar_graphs
     let lineGraphs = dataset.line_graphs
+    let pieGraphs = dataset.pie_graphs
     let barDiv = document.createElement("div")
     let barP = document.createElement("p")
     let lineDiv = document.createElement("div")
     let lineP = document.createElement("p")
+    let pieDiv = document.createElement("div")
+    let pieP = document.createElement("p")
     barDiv.id = "barDiv"
     barDiv.classList.add("graphDiv")
     barP.innerText = "Bar Graphs"
     lineDiv.id = "lineDiv"
     lineDiv.classList.add("graphDiv")
     lineP.innerText = "Line Graphs"
+    pieDiv.id = "pieDiv"
+    pieDiv.classList.add("graphDiv")
+    pieP.innerText = "Pie Graphs"
     barDiv.append(barP)
     lineDiv.append(lineP)
+    pieDiv.append(pieP)
     barGraphs.forEach((graph) => {
         let newDiv = document.createElement("div")
         let newP = document.createElement("p")
@@ -129,9 +136,37 @@ function addGraphs(dataset, graphsDiv){
         newDiv.append(del)
         lineDiv.append(newDiv)
     })
+    pieGraphs.forEach((graph) => {
+        let newDiv = document.createElement("div")
+        let newP = document.createElement("p")
+        let del = document.createElement("input")
+        del.type = "submit"
+        del.value = "Delete Graph"
+        del.addEventListener("click", (evt) => {
+            let parent = evt.target.parentNode
+            let graph_id = parent.dataset.graph_id
+            fetchDeletePieGraph(graph_id)
+            .then((r) => {
+                parent.remove()
+            })
+        })
+        newDiv.class = "pie_graph"
+        newDiv.dataset.graph_id = graph.id
+        newP.innerText = graph.title
+        newP.addEventListener("click", () => {
+            let ids = document.getElementById("user_id")
+            let user_id = ids.dataset.user_id
+            let data_id = ids.dataset.data_id
+            let graph_id = newDiv.dataset.graph_id
+            pieGraphShowPage(user_id, data_id, graph_id)
+        })
+        newDiv.append(newP)
+        newDiv.append(del)
+        pieDiv.append(newDiv)
+    })
     graphsDiv.append(barDiv)
     graphsDiv.append(lineDiv)
-    let pieCharts = dataset.pie_charts
+    graphsDiv.append(pieDiv)
 }
 
 function addGraphForm(user, dataset, body){
@@ -180,7 +215,7 @@ function createNewGraphHandler(evt, dataset){
             renderChartForm(dataset, selectBar, "Line")
             break;
         case "Pie Chart":
-            renderPieForm(dataset, selectBar)
+            renderChartForm(dataset, selectBar, "Pie")
             break;
         default:
     }
@@ -231,14 +266,13 @@ function renderChartForm(dataset, selectBar, chartType){
             mkGraph.remove()
             let count = document.querySelectorAll(".select-div").length
             genSelects(`Series-${count}`, newDiv, ds_json)
-            newDiv.append(sub)
-            newDiv.append(del)
+            if(chartType != "Pie"){newDiv.append(sub)}
+            if(chartType != "Pie"){newDiv.append(del)}
             newDiv.append(mkGraph)
         })
         del.addEventListener("click", (evt) => {
             let selects = document.querySelectorAll(".select-div")
             let last = selects[selects.length-1]
-            debugger
             if (last.id != "X-Axis-select-div" && last.id != "Series-1-select-div"){
                 last.remove()
             }
@@ -276,10 +310,22 @@ function renderChartForm(dataset, selectBar, chartType){
                     addGraphs(ds, document.getElementById("graphs_div"))
                 })
             })
-            } else {
+            } else if(chartType == "Line"){
                 fetchPersistLineGraph(dataset.id, submition)
                 .then((newGraph) => {
-                    console.log(newGraph)
+                let user_id = document.getElementById("user_id").dataset.user_id
+                let ds_id = document.getElementById("user_id").dataset.data_id
+                fetchUser(user_id)
+                .then((user) => {
+                    let ds = user.datasets.find((dataset) => {
+                        return dataset.id == newGraph.dataset_id
+                    })
+                    addGraphs(ds, document.getElementById("graphs_div"))
+                })
+            })
+            } else {
+                fetchPersistPieGraph(dataset.id, submition)
+                .then((newGraph) => {
                 let user_id = document.getElementById("user_id").dataset.user_id
                 let ds_id = document.getElementById("user_id").dataset.data_id
                 fetchUser(user_id)
@@ -292,20 +338,12 @@ function renderChartForm(dataset, selectBar, chartType){
             })
             }
         })
-        newDiv.append(sub)
-        newDiv.append(del)
+        if(chartType != "Pie"){newDiv.append(sub)}
+        if(chartType != "Pie"){newDiv.append(del)}
         newDiv.append(mkGraph)
         
 
     })
-}
-
-function renderLineForm(dataset, submit){
-    console.log("Line Form")
-}
-
-function renderPieForm(dataset, submit){
-    console.log("Pie Form")
 }
 
 function columnRowOptions(selectBox){
