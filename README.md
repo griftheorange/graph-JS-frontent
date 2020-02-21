@@ -25,3 +25,5 @@ The repo consists of seven main files:
 - dataset.js : renders the selected dataset's table, a list of all graphs attributed to this dataset, and renders a dropdown form that allows user to create new graphs. Handles creation/deletion of graphs
 - graphGenerator.js : handles the meat of the application's features. Digests datasets down into the selected data, formatting the output differently based on the requirements of each chart type. renders the charts in svg components with elements shaped, colored and positioned using D3.js
 - fetch.js : Also known as an adaptor, handles all of the fetches for the application in one file
+
+Generally speaking, each "page" of the application corresponds to one JS file, with an extra fetch.js file as the adaptor. All data processing and D3 rendering is handled on the frontend, with datafiles being re-fetched from Cloudinary when necessary and graph specs being persisted to the backend API.
