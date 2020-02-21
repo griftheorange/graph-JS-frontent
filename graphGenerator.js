@@ -300,12 +300,6 @@ function renderPieGraph(graph, json, orderedColumns, graphData){
     let values = []
     let testValues = []
 
-    console.log(graph)
-    console.log(json)
-    console.log(orderedColumns)
-    console.log(graphData)
-    console.log(total)
-
     for(let key in graph.flattenedSeries){
         if(graph.flattenedSeries[key][0] == "Column"){
             seriesNames.push(`: ${Object.keys(json[0])[graph.flattenedSeries[key][1]-1]}`)
@@ -340,16 +334,19 @@ function renderPieGraph(graph, json, orderedColumns, graphData){
     let center = 50
     let heightCorrect = 1.8
 
-    let canvas = d3.select("#graph-div")
-                .append("svg")
-                .style("margin-top", "1%")
-                .attr("width", `${width}%`)
-                .attr("height", `${height}%`)
+    let topCanvas = d3.select("#graph-div")
+                    .append("svg")
+                    .style("margin-top", "1%")
+                    .attr("width", `${width}%`)
+                    .attr("height", `${height}%`)
+
+    let canvas = topCanvas
                 .append("svg")
                 .attr("x", "25%")
                 .attr("y", "0%")
                 .append("g")
                 .attr("class", "pie-group")
+
 
     let parent = canvas.node().parentNode.parentNode
     let svgClientSize = parent.getBoundingClientRect()
@@ -380,9 +377,17 @@ function renderPieGraph(graph, json, orderedColumns, graphData){
         .attr("class", "arc")
 
     arcs.append("path")
-        .attr("d", arc)
+        .transition()
+        .delay(function(d, i){return i * 200})
+        .duration(function(d, i){return 2000/values.length})
+        .attrTween("d", function(d){
+            let i = d3.interpolate(d.startAngle+0.1, d.endAngle)
+            return function(t){
+                d.endAngle = i(t)
+                return arc(d)
+            }
+        })
         .attr("fill", function(d){
-            console.log(d)
             if(d.data <= 0){
                 return negColor(d.index)
             } else {
@@ -400,6 +405,123 @@ function renderPieGraph(graph, json, orderedColumns, graphData){
         .attr("stroke-width", "3px")
         .attr("x", "50%")
         .attr("y", "50%")
+        .attr("class", "arc-path")
+
+        let legend = canvas.selectAll("div")
+                .data(sortedValues)
+                .enter()
+                    .append("g")
+
+    legend.append("rect")
+            .attr("width", `2%`)
+            .attr("height", `1%`)
+            .attr("y", function(d, i){
+                return `${(i+1)*3-30}%`
+            })
+            .attr("x", '20em')
+            .attr("fill", function(d, i){
+                if(d <= 0){
+                    return negColor(i)
+                } else {
+                    return posColor(i-negValuesTrack.length)
+                }
+            })
+
+    legend.append("text")
+            .attr("style", "stroke: #660000; fill: #660000")
+            .attr("y", function(d, i){
+                return `${(i+1)*3-28.9}%`
+            })
+            .attr("font-size", "0.8em")
+            .attr("x", '27.8em')
+            .text(function(d){
+                let found = ""
+                for(let key in graphData[1]){
+                    if (graphData[1][key] == d){
+                        found = key.toLowerCase()
+                    }
+                }
+                found = found.split(" ")
+                found = found.map((word) => {
+                    return word.charAt(0).toUpperCase() + word.slice(1)
+                })
+                return `${found.join(" ")}`
+            })
+
+    let tooltip = topCanvas.append("svg")
+        .append("g")
+        .attr("class", "toolTip")
+    
+    let toolTipRect = tooltip
+        .append("rect")
+        .attr("width", "120px")
+        .attr("height", "90px")
+        .attr("rx", "10")
+        .style("opacity", "0")
+        .style("fill", "#fdf2d5")
+        .style("stroke", "#867b5f")
+        .style("stroke-width", "3")
+
+    let dataName = tooltip.append("text")
+        .attr("style", "stroke: #660000; fill: #660000")
+        .attr("font-size", "0.8em")
+        .attr("x", "15em")
+        .attr("y", "15em")
+        .style("opacity", "0")
+
+    let dataValue = tooltip.append("text")
+        .attr("style", "stroke: #660000; fill: #660000")
+        .attr("font-size", "0.8em")
+        .attr("x", "15em")
+        .attr("y", "17em")
+        .style("opacity", "0")
+
+    let dataPercent = tooltip.append("text")
+        .attr("style", "stroke: #660000; fill: #660000")
+        .attr("font-size", "0.8em")
+        .attr("x", "15em")
+        .attr("y", "19em")
+        .style("opacity", "0")
+
+
+    d3.selectAll("path").on("mousemove", function(d){
+        let found = ""
+        for (let key in graphData[1]){
+            if(graphData[1][key] == d.data){
+                found = key.toLowerCase()
+            }
+        }
+        found = found.split(" ")
+        found = found.map((word) => {
+            return word.charAt(0).toUpperCase() + word.slice(1)
+        })
+        toolTipRect.style("x", `${d3.event.offsetX+5}px`)
+        toolTipRect.style("y", `${d3.event.layerY-55}px`)
+        toolTipRect.style("opacity", "0.9")
+        toolTipRect.style("stroke-opacity", "0.9")
+
+        dataName.attr("x", `${d3.event.offsetX+15}px`)
+        dataName.attr("y", `${d3.event.layerY-35}px`)
+        dataName.text(`${found.join(" ")}`)
+        dataName.style("opacity", "0.9")
+
+        dataValue.attr("x", `${d3.event.offsetX+15}px`)
+        dataValue.attr("y", `${d3.event.layerY-6}px`)
+        dataValue.text(`${d.data.toFixed(2)}`)
+        dataValue.style("opacity", "0.9")
+
+        dataPercent.attr("x", `${d3.event.offsetX+15}px`)
+        dataPercent.attr("y", `${d3.event.layerY+23}px`)
+        dataPercent.text(`${(Math.abs(d.data)/total*100).toFixed(2)}%`)
+        dataPercent.style("opacity", "0.9")
+    })
+
+    d3.selectAll("path").on("mouseout", function(d){
+        toolTipRect.style("opacity", "0")
+        dataName.style("opacity", "0")
+        dataValue.style("opacity", "0")
+        dataPercent.style("opacity", "0")
+    })
 }
 
 function renderBarGraph(graph, json, orderedColumns, graphData){

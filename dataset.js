@@ -198,6 +198,7 @@ function addGraphForm(user, dataset, body){
 function addTable(dataset, newH1){
     fetchDataset(dataset)
     .then((file_text) => {
+        console.log(file_text)
         let table = generateTable(csvJSON(file_text))
         // insertAfter(table, newH1)
         document.querySelector("body").append(table)
