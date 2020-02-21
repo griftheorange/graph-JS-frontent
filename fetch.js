@@ -135,7 +135,7 @@ function fetchPersistPieGraph(ds_id, submission){
     .then(r => r.json())
 }
 
-//following three update graphs descriptions on backend 
+//updates graphs descriptions on backend 
 function fetchUpdateGraphDescription(value, id, chartType){
     return fetch(`http://localhost:3000/${chartType.toLowerCase()}_graphs/${id}`, {
         method: "PATCH",
@@ -148,6 +148,7 @@ function fetchUpdateGraphDescription(value, id, chartType){
     })
 }
 
+//renders the navbar on all pages
 function renderTopBar(user, body){
     let newDiv = document.createElement("div")
     newDiv.id = "topbar"
