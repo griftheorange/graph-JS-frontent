@@ -1,5 +1,6 @@
 let barDivHeight = 38
 
+//clears page and renders basic container div
 function prepPage(user_id, data_id, graph_id, body){
     let child = body.lastElementChild
     while (child){
@@ -15,10 +16,13 @@ function prepPage(user_id, data_id, graph_id, body){
     body.append(dataStore)
 }
 
+//if chart is a piegraph, runs
 function pieGraphShowPage(user_id, data_id, graph_id){
     let body = document.querySelector("body")
     prepPage(user_id, data_id, graph_id, body)
 
+    //fetches user and graph specs, then jsonifies the CSV, gets the column titles in order, then extracts the data
+    //finally, passes all processed info into render Pie Graph
     fetchUser(user_id)
     .then(user => renderTopBar(user, body))
     .then((r) => {
@@ -50,10 +54,13 @@ function pieGraphShowPage(user_id, data_id, graph_id){
     })
 }
 
+//if line show, runs
 function lineGraphShowPage(user_id, data_id, graph_id){
     let body = document.querySelector("body")
     prepPage(user_id, data_id, graph_id, body)
 
+    //fetches user and graph specs, parses csv to JSON, gets column titles in order, then extracts data
+    //finally, passes all data to render line graph
     fetchUser(user_id)
     .then(user => renderTopBar(user, body))
     .then((r) => {
@@ -84,10 +91,13 @@ function lineGraphShowPage(user_id, data_id, graph_id){
     })
 }
 
+//if bar show, runs
 function barGraphShowPage(user_id, data_id, graph_id){
     let body = document.querySelector("body")
     prepPage(user_id, data_id, graph_id, body)
 
+    //fetches user and graph specs. Then, parses the CSV to JSON, gets column titles in order, and extracts the bar data.
+    //finally, passes all data to render bar graph
     fetchUser(user_id)
     .then(user => renderTopBar(user, body))
     .then((r) => {

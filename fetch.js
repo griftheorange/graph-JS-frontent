@@ -1,8 +1,10 @@
+//gets user by id
 function fetchUser(id){
     return fetch(`http://localhost:3000/users/${id}`)
     .then(r => r.json())
 }
 
+//creates user by username and password
 function fetchCreateUser(username, pass){
     return fetch(`http://localhost:3000/users`, {
         method: "POST",
@@ -16,6 +18,7 @@ function fetchCreateUser(username, pass){
     }).then(r => r.json())
 }
 
+//gets bar graph specs by id
 function fetchGraph(id){
     return fetch(`http://localhost:3000/bar_graphs/${id}`)
     .then(r => r.json())
@@ -26,6 +29,7 @@ function fetchGraph(id){
     })
 }
 
+//gets line graph specs by id
 function fetchLineGraph(id){
     return fetch(`http://localhost:3000/line_graphs/${id}`)
     .then(r => r.json())
@@ -36,6 +40,7 @@ function fetchLineGraph(id){
     })
 }
 
+//gets pie graph specs by id
 function fetchPieGraph(id){
     return fetch(`http://localhost:3000/pie_graphs/${id}`)
     .then(r => r.json())
@@ -45,6 +50,8 @@ function fetchPieGraph(id){
         return graph
     })
 }
+
+//following three delete respective graphs by id
 
 function fetchDeleteBarGraph(graph_id){
     return fetch(`http://localhost:3000/bar_graphs/${graph_id}`, {
@@ -64,6 +71,7 @@ function fetchDeletePieGraph(graph_id){
     })
 }
 
+//fetches seeded user for testing
 function fetchGriff(){
     return fetch("http://localhost:3000/users")
     .then(r => r.json())
@@ -74,12 +82,14 @@ function fetchGriff(){
     })
 }
 
+//fetches dataset from cloudinary by URL
 function fetchDataset(dataset){
     return fetch(dataset.csv_url)
     .then(r => r.blob())
     .then(r => r.text())
 }
 
+//following two outsource insertion functions to make DOM manipulation easier in other files 
 function insertAfter(el, referenceNode) {
     referenceNode.parentNode.insertBefore(el, referenceNode.nextSibling);
 }
@@ -88,6 +98,7 @@ function insertBefore(el, referenceNode) {
     referenceNode.parentNode.insertBefore(el, referenceNode);
 }
 
+//following three save new graphs to backend
 function fetchPersistBarGraph(ds_id, submission){
     submission["dataset_id"] = ds_id
     return fetch("http://localhost:3000/bar_graphs", {
@@ -124,6 +135,7 @@ function fetchPersistPieGraph(ds_id, submission){
     .then(r => r.json())
 }
 
+//following three update graphs descriptions on backend 
 function fetchUpdateGraphDescription(value, id, chartType){
     return fetch(`http://localhost:3000/${chartType.toLowerCase()}_graphs/${id}`, {
         method: "PATCH",

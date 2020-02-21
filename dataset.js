@@ -3,12 +3,13 @@ function renderDsPage(ds_id){
     let child = body.lastElementChild
     let user_id = document.querySelector("h1").dataset.user_id
 
+    //clears DOM if any elements present
     while(child){
         child.remove()
         child = body.lastElementChild
     }
 
-
+    //saves data that must be carried over to this page into hidden element, appends
     let hidden = document.createElement("div")
     hidden.dataset.user_id = user_id
     hidden.dataset.data_id = ds_id
@@ -16,6 +17,7 @@ function renderDsPage(ds_id){
     hidden.id = "user_id"
     body.append(hidden)
     
+    //fetches user and calls addGraphs and Form for this user
     fetchUser(user_id)
     .then((user) => {
         let dataset = user.datasets.find((dataset) => {
@@ -52,6 +54,7 @@ function renderDsPageLink(data_id, user_id){
     renderDsPage(data_id)
 }
 
+//Adds graph links for all of a users graphs, split into bins based on type
 function addGraphs(dataset, graphsDiv){
     let child = graphsDiv.lastElementChild
     while (child){
@@ -59,6 +62,7 @@ function addGraphs(dataset, graphsDiv){
         child = graphsDiv.lastElementChild
     }
 
+    //creates all holding divs
     let barGraphs = dataset.bar_graphs
     let lineGraphs = dataset.line_graphs
     let pieGraphs = dataset.pie_graphs
@@ -68,6 +72,8 @@ function addGraphs(dataset, graphsDiv){
     let lineP = document.createElement("p")
     let pieDiv = document.createElement("div")
     let pieP = document.createElement("p")
+
+    //applies attributes to the containers
     barDiv.id = "barDiv"
     barDiv.classList.add("graphDiv")
     barP.innerText = "Bar Graphs"
@@ -80,6 +86,7 @@ function addGraphs(dataset, graphsDiv){
     barDiv.append(barP)
     lineDiv.append(lineP)
     pieDiv.append(pieP)
+    //the following three for each groups fill the divs with elements dependent on the graphs present in the fetched user
     barGraphs.forEach((graph) => {
         let newDiv = document.createElement("div")
         let newP = document.createElement("p")
@@ -169,6 +176,7 @@ function addGraphs(dataset, graphsDiv){
     graphsDiv.append(pieDiv)
 }
 
+//adds a conditionally rendered graph form whose type is dependent on select box
 function addGraphForm(user, dataset, body){
     let h3 = document.createElement("h3")
     h3.innerText = "New Graph Form"
@@ -195,6 +203,7 @@ function addGraphForm(user, dataset, body){
     body.append(newDiv)
 }
 
+//generates table for selected dataset
 function addTable(dataset, newH1){
     fetchDataset(dataset)
     .then((file_text) => {
@@ -205,6 +214,7 @@ function addTable(dataset, newH1){
     })
 }
 
+//handles creation of new graph form based on select bar type
 function createNewGraphHandler(evt, dataset){
     let selectBar = evt.target
     
@@ -222,6 +232,7 @@ function createNewGraphHandler(evt, dataset){
     }
 }
 
+//renders different chart forms based on chartType
 function renderChartForm(dataset, selectBar, chartType){
     fetchDataset(dataset)
     .then((ds_json) => {
@@ -347,6 +358,7 @@ function renderChartForm(dataset, selectBar, chartType){
     })
 }
 
+//gets column vs row options for form
 function columnRowOptions(selectBox){
     let op1 = document.createElement("option")
     op1.innerText = "Column"
@@ -356,6 +368,7 @@ function columnRowOptions(selectBox){
     selectBox.append(op2)
 }
 
+//generates the select boxes needed for new graph form
 function genSelects(text, newDiv, ds_json){
     let selectDiv = document.createElement("div")
     selectDiv.id = `${text}-select-div`
@@ -377,6 +390,7 @@ function genSelects(text, newDiv, ds_json){
 
 }
 
+//gets a list of options based on specs in column vs row option
 function genSeriesOptions(column_or_row, selectBoxPref, ds_json, id){
     let dropbar = document.getElementById(`${id}`)
     if(dropbar){dropbar.remove()}

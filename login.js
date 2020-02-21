@@ -1,9 +1,12 @@
     let bod = document.querySelector("body")
+
+    //starts the application at login
     constructMain()
     // loggedInTest()
     // datasetTest(44)
     // pieGraphShowPage(18, 44, 5)
 
+    //used exclusively for testing
     function datasetTest(ds_id){
         let newH1 = document.createElement("h1")
         newH1.dataset.user_id = 18
@@ -11,6 +14,7 @@
         renderDsPage(ds_id)
     }
 
+    //used exclusively for testing
     function loggedInTest(){
         fetchGriff()
         .then((griff) => {
@@ -18,6 +22,8 @@
         })
     }
    
+
+    //renders all button, input, text components. Adds event listeners to each
     function constructMain(){
         let body = document.querySelector("body")
         let child = body.lastElementChild
@@ -83,6 +89,7 @@
         insertAfter(tf_2, pass)
     }
 
+    //handles login/create user based on buttonType argument
     function submitClickEventHandler(evt, tf_1, tf_2, buttonType){
         if(buttonType == "login"){
             let userInput = tf_1.value

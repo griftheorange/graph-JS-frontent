@@ -1,10 +1,12 @@
 function renderMainMenu(user, bod){
 
+    //clears DOM at start
     let child = bod.lastElementChild
     while (child) {
         child.remove()
         child = bod.lastElementChild
     }
+    //renders NavBar
     renderTopBar(user, bod)
     let userHead = document.createElement("h1")
     let fileInput = document.createElement("input")
@@ -12,6 +14,7 @@ function renderMainMenu(user, bod){
     let dsDiv = document.createElement("div")
     dsDiv.id = "dataset_div"
 
+    //sets up all DOM elements
     userHead.innerText = `Welcome ${user.username.replace(user.username.charAt(0), user.username.charAt(0).toUpperCase())}`
     userHead.dataset.user_id = user.id
     fileInput.type = "file"
@@ -21,13 +24,16 @@ function renderMainMenu(user, bod){
     submit.value = "save"
     submit.addEventListener("click", saveCSV)
 
+    //appends them
     bod.append(userHead)
     bod.append(fileInput)
     bod.append(submit)
     bod.append(dsDiv)
+    //renders Datasets once DOM is mounted appropriately
     renderDatasets()
 }
 
+//fetches user, clears old datasets if any present, appends new cards for each dataset belonging to user, adds event listeners
 function renderDatasets(){
     let user = getUser()
     user.then((user) => {
@@ -59,6 +65,7 @@ function renderDs(evt){
     renderDsPage(evt.target.dataset.ds_id)
 }
 
+//deletes DS from backend
 function deleteCSV(evt){
     let parentDiv = evt.target.parentNode
     fetch(`http://localhost:3000/datasets/${parentDiv.dataset.ds_id}`, {
@@ -72,6 +79,7 @@ function deleteCSV(evt){
     })
 }
 
+//saves DS to backend
 function saveCSV(evt){
     let file = document.querySelector("input").files[0]
     let formData = new FormData();
@@ -88,6 +96,7 @@ function saveCSV(evt){
     })
 }
 
+//activates when a CSV is input into the form, renders a temporary table view for the uploaded file before being saved as a preview
 function csvUploadedEvent(evt) {
     let t = document.getElementById("tableDiv")
     if (t){t.remove()}
@@ -120,6 +129,7 @@ function csvJSON(csv){
     return result;
 }
 
+//generates table for passed in jsonified CSV
 function generateTable(json){
     let bod = document.querySelector("body")
     let newDiv = document.createElement("div")
@@ -157,12 +167,14 @@ function generateTable(json){
     return newDiv
 }
 
+//fetches user
 function getUser(){
     let user_id = document.querySelector("h1").dataset.user_id
     return fetch(`http://localhost:3000/users/${user_id}`)
     .then(r => r.json())
 }
 
+//selects dataset_div from DOM
 function getDsDiv(){
     return document.getElementById("dataset_div")
 }
